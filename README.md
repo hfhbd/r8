@@ -13,7 +13,15 @@ pluginManagement {
     mavenCentral()
   }
 }
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+    }
+}
 ```
+
+You also need to add the `google` repository. 
 
 ## Usage
 
