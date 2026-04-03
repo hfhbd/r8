@@ -27,7 +27,7 @@ abstract class CreateR8RuleTask : DefaultTask() {
 
     @TaskAction
     protected fun createR8Rule() {
-        File(outputDirectory.get().asFile, "META-INF/proguard/${moduleName.get()}.pro").apply {
+        File(outputDirectory.get().asFile, "META-INF/com.android.tools/r8/${moduleName.get()}.pro").apply {
             parentFile.mkdirs()
         }.writeText(rules.get().joinToString("\n", postfix = "\n"))
     }
