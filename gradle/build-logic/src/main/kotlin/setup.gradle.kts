@@ -1,5 +1,5 @@
 plugins {
-    id("java-library")
+    kotlin("jvm")
     id("maven-publish")
     id("signing")
     id("io.github.hfhbd.mavencentral")

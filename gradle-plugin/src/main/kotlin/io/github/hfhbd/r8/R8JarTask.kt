@@ -9,6 +9,7 @@ import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -21,7 +22,7 @@ import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
 @CacheableTask
-abstract class R8JarTask : DefaultTask() {
+abstract class R8JarTask internal constructor(): DefaultTask() {
     init {
         group = "r8"
     }
@@ -39,6 +40,7 @@ abstract class R8JarTask : DefaultTask() {
     abstract val rules: ConfigurableFileCollection
 
     @get:Input
+    @get:Optional
     abstract val targetJvmVersion: Property<JavaLanguageVersion>
 
     @get:OutputFile
@@ -57,12 +59,12 @@ abstract class R8JarTask : DefaultTask() {
     internal fun createJar() {
         javaExec.javaexec {
             val launcher = javaToolchains.launcherFor {
-                languageVersion.set(targetJvmVersion)
+                it.languageVersion.set(targetJvmVersion)
             }
 
-            classpath(r8Classpath)
-            mainClass.set("com.android.tools.r8.R8")
-            argumentProviders.add(
+            it.classpath(r8Classpath)
+            it.mainClass.set("com.android.tools.r8.R8")
+            it.argumentProviders.add(
                 CommandLineArgumentProvider {
                     buildList {
                         add("--release")

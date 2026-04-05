@@ -1,9 +1,13 @@
 plugins {
-    `kotlin-dsl`
+    id("java-gradle-plugin")
     id("setup")
 }
 
-kotlin.jvmToolchain(17)
+kotlin {
+    jvmToolchain(17)
+    @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+    abiValidation.enabled = true
+}
 
 gradlePlugin.plugins.register("io.github.hfhbd.r8") {
     id = name
@@ -17,9 +21,17 @@ tasks.validatePlugins {
 }
 
 val version by tasks.registering(StoreVersion::class) {
-    version.put("R8", libs.r8.map { it.toString() })
+    version.put("R8_MODULE", libs.r8.map { it.module.toString() })
+    version.put("R8_VERSION", libs.r8.map { it.version.toString() })
 }
 
 sourceSets.main {
     kotlin.srcDir(version)
+}
+
+testing.suites.register("integrationTest", JvmTestSuite::class) {
+    gradlePlugin.testSourceSet(sources)
+    dependencies {
+        implementation(gradleTestKit())
+    }
 }
