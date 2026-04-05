@@ -11,7 +11,7 @@ import org.gradle.api.tasks.TaskAction
 import java.io.File
 
 @CacheableTask
-abstract class CreateR8RuleTask : DefaultTask() {
+abstract class CreateR8RuleTask internal constructor(): DefaultTask() {
     init {
         group = "r8"
     }
@@ -26,7 +26,7 @@ abstract class CreateR8RuleTask : DefaultTask() {
     abstract val outputDirectory: DirectoryProperty
 
     @TaskAction
-    protected fun createR8Rule() {
+    internal fun createR8Rule() {
         File(outputDirectory.get().asFile, "META-INF/com.android.tools/r8/${moduleName.get()}.pro").apply {
             parentFile.mkdirs()
         }.writeText(rules.get().joinToString("\n", postfix = "\n"))
