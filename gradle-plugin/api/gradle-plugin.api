@@ -1,0 +1,19 @@
+public abstract class io/github/hfhbd/r8/CreateR8RuleTask : org/gradle/api/DefaultTask {
+	public abstract fun getModuleName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getRules ()Lorg/gradle/api/provider/ListProperty;
+}
+
+public abstract class io/github/hfhbd/r8/R8JarTask : org/gradle/api/DefaultTask {
+	public abstract fun getInputJars ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getLibJars ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getR8Jar ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getRules ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getTargetJvmVersion ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class io/github/hfhbd/r8/R8Plugin : org/gradle/api/Plugin {
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
