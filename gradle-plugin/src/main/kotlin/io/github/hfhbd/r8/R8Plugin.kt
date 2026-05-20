@@ -37,9 +37,6 @@ abstract class R8Plugin : Plugin<Project> {
 
             target.tasks.register("r8", R8JarTask::class.java) {
                 val toolchain = target.extensions.getByType(JavaPluginExtension::class.java).toolchain
-                it.rules.add(applicationExtension.mainClass.map {
-                    """-keep public class $it { public static void main(java.lang.String[]); }"""
-                })
 
                 it.javaHome.convention(javaToolchains.launcherFor {
                     it.languageVersion.set(toolchain.languageVersion)

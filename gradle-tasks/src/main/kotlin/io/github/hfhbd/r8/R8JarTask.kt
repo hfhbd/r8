@@ -18,6 +18,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -41,6 +42,7 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
     }
 
     @get:Input
+    @get:Optional
     abstract val mainClass: Property<String>
 
     @get:InputFiles
@@ -52,7 +54,7 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
     abstract val libJars: ConfigurableFileCollection
 
     @get:Input
-    abstract val rules: ListProperty<String>
+    abstract val additionalRules: ListProperty<String>
 
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -76,7 +78,7 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
             it.tempDir.set(temporaryDir)
             it.javaHome.set(javaHome)
             it.r8Jar.set(r8Jar)
-            it.rules.set(rules)
+            it.additionalRules.set(additionalRules)
             it.libJars.from(libJars)
             it.programFiles.from(programFiles)
         }
@@ -88,24 +90,35 @@ interface R8WorkerParameters : WorkParameters {
     val javaHome: DirectoryProperty
     val tempDir: DirectoryProperty
     val r8Jar: RegularFileProperty
-    val rules: ListProperty<String>
+    val additionalRules: ListProperty<String>
     val libJars: ConfigurableFileCollection
     val programFiles: ConfigurableFileCollection
 }
 
 abstract class R8Worker : WorkAction<R8WorkerParameters> {
     override fun execute() {
-        val tempR8Jar = File(parameters.tempDir.get().asFile, "r8.jar")
+        if (parameters.mainClass.isPresent) {
+            val tempR8Jar = File(parameters.tempDir.get().asFile, "r8.jar")
+            val mainClass = parameters.mainClass.get()
 
-        executeR8(
-            outputJar = tempR8Jar.toPath(),
-            rules = parameters.rules.get(),
-            javaHome = parameters.javaHome.get().asFile.toPath(),
-            libJars = parameters.libJars.map { it.toPath() },
-            programFiles = parameters.programFiles.map { it.toPath() },
-        )
+            executeR8(
+                outputJar = tempR8Jar.toPath(),
+                rules = parameters.additionalRules.get() + """-keep public class $mainClass { public static void main(java.lang.String[]); }""",
+                javaHome = parameters.javaHome.get().asFile.toPath(),
+                libJars = parameters.libJars.map { it.toPath() },
+                programFiles = parameters.programFiles.map { it.toPath() },
+            )
 
-        modifyJarMainClass(tempR8Jar, parameters.r8Jar.get().asFile, parameters.mainClass.get())
+            modifyJarMainClass(tempR8Jar, parameters.r8Jar.get().asFile, mainClass)
+        } else {
+            executeR8(
+                outputJar = parameters.r8Jar.get().asFile.toPath(),
+                rules = parameters.additionalRules.get(),
+                javaHome = parameters.javaHome.get().asFile.toPath(),
+                libJars = parameters.libJars.map { it.toPath() },
+                programFiles = parameters.programFiles.map { it.toPath() },
+            )
+        }
     }
 }
 

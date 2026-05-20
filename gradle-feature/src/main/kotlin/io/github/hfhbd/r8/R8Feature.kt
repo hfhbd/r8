@@ -78,10 +78,7 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
             parentBuildModel.applications.configureEach { application ->
                 tasks.register("r8" + application.name, R8JarTask::class.java) {
                     it.mainClass.set(application.mainClassName)
-                    it.rules.add(application.mainClassName.map {
-                        """-keep public class $it { public static void main(java.lang.String[]); }"""
-                    })
-                    it.rules.addAll(buildModel.additionalR8Rules)
+                    it.additionalRules.addAll(buildModel.additionalR8Rules)
                     it.javaHome.set(application.jdkLauncher.map { it.metadata.installationPath })
 
                     it.r8Jar.convention(layout.contextBuildDirectory.map { it.file("r8/r8-${application.name}.jar") })

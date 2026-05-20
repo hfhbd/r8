@@ -24,12 +24,6 @@ class UnitTest {
         val r8Task = project.tasks.findByName("r8")
         assertTrue(r8Task is R8JarTask)
 
-        assertEquals(
-            listOf(
-                "-keep public class com.example.Main { public static void main(java.lang.String[]); }",
-            ),
-            r8Task.rules.get(),
-        )
         assertEquals("com.example.Main", r8Task.mainClass.get())
 
         val expectedOutputFile = project.file("build/r8/r8.jar")
