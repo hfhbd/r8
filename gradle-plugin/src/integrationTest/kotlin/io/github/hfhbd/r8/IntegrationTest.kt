@@ -34,7 +34,6 @@ class IntegrationTest {
         assertBuild(projectDir)
     }
 
-
     @Test
     fun generatesSimplifiedJarWithApplicationPluginAndJvm8Toolchain() {
         val projectDir = createTempDirectory("integration-test").toFile()
@@ -88,8 +87,11 @@ public class Main {
             )
         }
 
+        val isDebug = System.getenv("DEBUGGER_ENABLED") == "true"
+
         val build = GradleRunner.create()
             .withProjectDir(projectDir)
+            .withDebug(isDebug)
             .withPluginClasspath()
             .withArguments(":r8")
             .build()

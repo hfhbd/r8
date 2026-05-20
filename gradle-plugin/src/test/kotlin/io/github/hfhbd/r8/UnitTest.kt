@@ -21,30 +21,21 @@ class UnitTest {
         val javaApplication = project.extensions.getByName("application") as JavaApplication
         javaApplication.mainClass.set("com.example.Main")
 
-        val createR8RuleTask = project.tasks.findByName("createR8Rule")
-        assertTrue(createR8RuleTask is CreateR8RuleTask)
+        val r8Task = project.tasks.findByName("r8")
+        assertTrue(r8Task is R8JarTask)
+
         assertEquals(
             listOf(
                 "-keep public class com.example.Main { public static void main(java.lang.String[]); }",
             ),
-            createR8RuleTask.rules.get(),
+            r8Task.rules.get(),
         )
-        assertEquals(createR8RuleTask.moduleName.get(), project.name)
-        val expectedOutputFile = project.file("build/generated/r8/rules")
+
+        val expectedOutputFile = project.file("build/r8/r8.jar")
         assertEquals(
             expectedOutputFile,
-            createR8RuleTask.outputDirectory.get().asFile
+            r8Task.r8Jar.get().asFile
         )
-
-        createR8RuleTask.createR8Rule()
-        assertEquals(
-            """-keep public class com.example.Main { public static void main(java.lang.String[]); }
-                |
-            """.trimMargin(),
-            File(expectedOutputFile, "META-INF/com.android.tools/r8/test.pro").readText())
-
-        val r8Task = project.tasks.findByName("r8")
-        assertTrue(r8Task is R8JarTask)
     }
 
     @Test
@@ -55,8 +46,5 @@ class UnitTest {
 
         val noR8Task = project.tasks.findByName("r8")
         assertNull(noR8Task)
-
-        val noCreateR8RuleTask = project.tasks.findByName("createR8Rule")
-        assertNull(noCreateR8RuleTask)
     }
 }

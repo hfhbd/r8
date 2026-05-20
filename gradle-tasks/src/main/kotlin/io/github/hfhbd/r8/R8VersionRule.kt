@@ -8,13 +8,11 @@ import org.gradle.api.attributes.java.TargetJvmVersion
 import javax.inject.Inject
 
 @CacheableRule
-internal abstract class R8VersionRule @Inject constructor(
-    val jvmVersion: Int,
-) : ComponentMetadataRule {
+abstract class R8VersionRule : ComponentMetadataRule {
     override fun execute(context: ComponentMetadataContext) {
         context.details.withVariant("compile") {
             it.attributes {
-                it.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, jvmVersion)
+                it.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 11)
                 it.attribute(Usage.USAGE_ATTRIBUTE, it.named(Usage::class.java, Usage.JAVA_API))
             }
         }
