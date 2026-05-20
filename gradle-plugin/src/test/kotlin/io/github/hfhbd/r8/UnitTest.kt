@@ -30,6 +30,7 @@ class UnitTest {
             ),
             r8Task.rules.get(),
         )
+        assertEquals("com.example.Main", r8Task.mainClass.get())
 
         val expectedOutputFile = project.file("build/r8/r8.jar")
         assertEquals(

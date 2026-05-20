@@ -21,4 +21,4 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
 
       - name: Build with Gradle
-        run: ./gradlew build :gradle-plugin:integrationTest
+        run: ./gradlew build integrationTest

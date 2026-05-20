@@ -8,7 +8,6 @@ import org.gradle.api.artifacts.dsl.DependencyFactory
 import org.gradle.api.plugins.JavaApplication
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.bundling.Jar
 import org.gradle.jvm.toolchain.JavaToolchainService
 import javax.inject.Inject
 
@@ -36,10 +35,6 @@ abstract class R8Plugin : Plugin<Project> {
         target.pluginManager.withPlugin("application") {
             val applicationExtension = target.extensions.getByName("application") as JavaApplication
 
-            val jar = tasks.named("jar", Jar::class.java) {
-                it.manifest.attributes["Main-Class"] = applicationExtension.mainClass
-            }
-
             target.tasks.register("r8", R8JarTask::class.java) {
                 val toolchain = target.extensions.getByType(JavaPluginExtension::class.java).toolchain
                 it.rules.add(applicationExtension.mainClass.map {
@@ -50,8 +45,10 @@ abstract class R8Plugin : Plugin<Project> {
                     it.languageVersion.set(toolchain.languageVersion)
                 }.map { it.metadata.installationPath })
 
+                it.mainClass.set(applicationExtension.mainClass)
+
                 it.r8Jar.convention(target.layout.buildDirectory.file("r8/r8.jar"))
-                it.programFiles.from(jar, target.configurations.named("runtimeClasspath"))
+                it.programFiles.from(tasks.named("jar"), target.configurations.named("runtimeClasspath"))
             }
         }
     }

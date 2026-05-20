@@ -6,6 +6,8 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
 import java.net.URLClassLoader
+import java.util.jar.Attributes
+import java.util.jar.JarFile
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -93,6 +95,7 @@ public class Main {
             .withProjectDir(projectDir)
             .withDebug(isDebug)
             .withPluginClasspath()
+            .forwardOutput()
             .withArguments(":r8")
             .build()
 
@@ -116,5 +119,7 @@ public class Main {
             }
         }
         assertEquals("Hello World\n", outputStream.toString())
+        val jarFile = JarFile(r8Jar)
+        assertEquals("com.example.Main", jarFile.manifest.mainAttributes[Attributes.Name.MAIN_CLASS])
     }
 }

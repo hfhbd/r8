@@ -18,18 +18,20 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
+import java.io.File
 import java.nio.file.Path
+import java.util.jar.Attributes
+import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
+import java.util.jar.Manifest
 import javax.inject.Inject
 
 @CacheableTask
@@ -37,6 +39,9 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
     init {
         group = "r8"
     }
+
+    @get:Input
+    abstract val mainClass: Property<String>
 
     @get:InputFiles
     @get:SkipWhenEmpty
@@ -67,6 +72,8 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
         workerExecutor.classLoaderIsolation {
             it.classpath.from(r8Classpath)
         }.submit(R8Worker::class.java) {
+            it.mainClass.set(mainClass)
+            it.tempDir.set(temporaryDir)
             it.javaHome.set(javaHome)
             it.r8Jar.set(r8Jar)
             it.rules.set(rules)
@@ -77,7 +84,9 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
 }
 
 interface R8WorkerParameters : WorkParameters {
+    val mainClass: Property<String>
     val javaHome: DirectoryProperty
+    val tempDir: DirectoryProperty
     val r8Jar: RegularFileProperty
     val rules: ListProperty<String>
     val libJars: ConfigurableFileCollection
@@ -86,13 +95,43 @@ interface R8WorkerParameters : WorkParameters {
 
 abstract class R8Worker : WorkAction<R8WorkerParameters> {
     override fun execute() {
+        val tempR8Jar = File(parameters.tempDir.get().asFile, "r8.jar")
+
         executeR8(
-            outputJar = parameters.r8Jar.get().asFile.toPath(),
+            outputJar = tempR8Jar.toPath(),
             rules = parameters.rules.get(),
             javaHome = parameters.javaHome.get().asFile.toPath(),
             libJars = parameters.libJars.map { it.toPath() },
             programFiles = parameters.programFiles.map { it.toPath() },
         )
+
+        modifyJarMainClass(tempR8Jar, parameters.r8Jar.get().asFile, parameters.mainClass.get())
+    }
+}
+
+
+fun modifyJarMainClass(inputJarPath: File, outputJarPath: File, newMainClass: String) {
+    val manifest = JarFile(inputJarPath).use { jarFile ->
+        jarFile.manifest ?: Manifest().apply {
+            mainAttributes[Attributes.Name.MANIFEST_VERSION] = "1.0"
+        }
+    }
+
+    manifest.mainAttributes[Attributes.Name.MAIN_CLASS] = newMainClass
+
+    JarFile(inputJarPath).use { inputJar ->
+        outputJarPath.outputStream().use {
+            JarOutputStream(it, manifest).use { outputJar ->
+                inputJar.entries().asSequence().forEach { entry ->
+                    if (entry.name != JarFile.MANIFEST_NAME) {
+                        outputJar.putNextEntry(entry)
+                        inputJar.getInputStream(entry).use { input ->
+                            input.copyTo(outputJar)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
