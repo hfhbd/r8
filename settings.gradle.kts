@@ -17,4 +17,3 @@ enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 include(":gradle-tasks")
 include(":gradle-plugin")
-include(":gradle-feature")
