@@ -80,7 +80,7 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
             it.r8Jar.set(r8Jar)
             it.additionalRules.set(additionalRules)
             it.libJars.from(libJars)
-            it.programFiles.from(programFiles)
+            it.programFiles.from(programFiles.asFileTree)
         }
     }
 }
