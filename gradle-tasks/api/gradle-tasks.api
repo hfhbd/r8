@@ -1,0 +1,35 @@
+public abstract class io/github/hfhbd/r8/R8JarTask : org/gradle/api/DefaultTask {
+	public abstract fun getAdditionalRules ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getJavaHome ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getLibJars ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getMainClass ()Lorg/gradle/api/provider/Property;
+	public abstract fun getProgramFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getR8Classpath ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getR8Jar ()Lorg/gradle/api/file/RegularFileProperty;
+}
+
+public final class io/github/hfhbd/r8/R8JarTaskKt {
+	public static final fun modifyJarMainClass (Ljava/io/File;Ljava/io/File;Ljava/lang/String;)V
+}
+
+public abstract class io/github/hfhbd/r8/R8VersionRule : org/gradle/api/artifacts/ComponentMetadataRule {
+	public fun <init> ()V
+	public synthetic fun execute (Ljava/lang/Object;)V
+	public fun execute (Lorg/gradle/api/artifacts/ComponentMetadataContext;)V
+}
+
+public abstract class io/github/hfhbd/r8/R8Worker : org/gradle/workers/WorkAction {
+	public fun <init> ()V
+	public fun execute ()V
+}
+
+public abstract interface class io/github/hfhbd/r8/R8WorkerParameters : org/gradle/workers/WorkParameters {
+	public abstract fun getAdditionalRules ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getJavaHome ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getLibJars ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getMainClass ()Lorg/gradle/api/provider/Property;
+	public abstract fun getProgramFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getR8Jar ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getTempDir ()Lorg/gradle/api/file/DirectoryProperty;
+}
+

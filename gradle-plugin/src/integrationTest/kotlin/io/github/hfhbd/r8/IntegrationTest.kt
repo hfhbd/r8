@@ -6,9 +6,12 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
 import java.net.URLClassLoader
+import java.util.jar.Attributes
+import java.util.jar.JarFile
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
@@ -31,9 +34,35 @@ class IntegrationTest {
            """.trimMargin()
         )
 
-        assertBuild(projectDir)
+        val r8Jar = assertBuild(projectDir)
+        val jarFile = JarFile(r8Jar)
+        assertEquals("com.example.Main", jarFile.manifest.mainAttributes[Attributes.Name.MAIN_CLASS])
     }
 
+    @Test
+    fun applicationPluginWithoutMainClass() {
+        val projectDir = createTempDirectory("integration-test").toFile()
+        File(projectDir, "build.gradle.kts").writeText(
+            // language=kotlin
+            """
+               |plugins {
+               |  id("io.github.hfhbd.r8")
+               |  id("application")
+               |}
+               |
+               |repositories.google()
+               |
+               |tasks.r8 {
+               | additionalRules.add("-keep public class com.example.Main { public static void main(java.lang.String[]); }")
+               |}
+               |
+           """.trimMargin()
+        )
+
+        val r8Jar = assertBuild(projectDir)
+        val jarFile = JarFile(r8Jar)
+        assertNull(jarFile.manifest.mainAttributes[Attributes.Name.MAIN_CLASS])
+    }
 
     @Test
     fun generatesSimplifiedJarWithApplicationPluginAndJvm8Toolchain() {
@@ -69,10 +98,12 @@ class IntegrationTest {
            """.trimMargin()
         )
 
-        assertBuild(projectDir)
+        val r8Jar = assertBuild(projectDir)
+        val jarFile = JarFile(r8Jar)
+        assertEquals("com.example.Main", jarFile.manifest.mainAttributes[Attributes.Name.MAIN_CLASS])
     }
 
-    private fun assertBuild(projectDir: File) {
+    private fun assertBuild(projectDir: File) : File {
         File(projectDir, "src/main/java/com/example/Main.java").apply {
             parentFile.mkdirs()
 
@@ -88,9 +119,13 @@ public class Main {
             )
         }
 
+        val isDebug = System.getenv("DEBUGGER_ENABLED") == "true"
+
         val build = GradleRunner.create()
             .withProjectDir(projectDir)
+            .withDebug(isDebug)
             .withPluginClasspath()
+            .forwardOutput()
             .withArguments(":r8")
             .build()
 
@@ -114,5 +149,6 @@ public class Main {
             }
         }
         assertEquals("Hello World\n", outputStream.toString())
+        return r8Jar
     }
 }

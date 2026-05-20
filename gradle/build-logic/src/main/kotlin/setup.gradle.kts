@@ -1,9 +1,20 @@
 plugins {
     kotlin("jvm")
+    id("java-gradle-plugin")
     id("maven-publish")
     id("signing")
     id("io.github.hfhbd.mavencentral")
     id("dev.sigstore.sign")
+}
+
+kotlin {
+    jvmToolchain(17)
+    @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+    abiValidation.enabled = true
+}
+
+tasks.validatePlugins {
+    enableStricterValidation.set(true)
 }
 
 testing.suites.withType(JvmTestSuite::class).configureEach {
@@ -13,14 +24,6 @@ testing.suites.withType(JvmTestSuite::class).configureEach {
 java {
     withJavadocJar()
     withSourcesJar()
-}
-
-configurations.configureEach {
-    if (isCanBeConsumed) {
-        attributes {
-            attribute(GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE, named(GradleVersion.current().version))
-        }
-    }
 }
 
 // Workaround for clash between `signature` and `archives`; remove when bumping to Gradle 10:
