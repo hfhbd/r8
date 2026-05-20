@@ -1,0 +1,29 @@
+public abstract class io/github/hfhbd/r8/EcosystemPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/initialization/Settings;)V
+}
+
+public abstract interface class io/github/hfhbd/r8/R8BuildModel : org/gradle/features/binding/BuildModel {
+	public abstract fun getAdditionalR8Rules ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getR8Version ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract interface class io/github/hfhbd/r8/R8Definition : org/gradle/features/binding/Definition {
+	public abstract fun getAdditionalR8Rules ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getR8Version ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class io/github/hfhbd/r8/R8Feature : org/gradle/api/Plugin, org/gradle/features/binding/ProjectFeatureBinding {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+	public fun bind (Lorg/gradle/features/binding/ProjectFeatureBindingBuilder;)V
+}
+
+public abstract class io/github/hfhbd/r8/R8Feature$ApplyAction : org/gradle/features/binding/ProjectFeatureApplyAction {
+	public fun <init> ()V
+	public fun apply (Lorg/gradle/features/binding/ProjectFeatureApplicationContext;Lio/github/hfhbd/r8/R8Definition;Lio/github/hfhbd/r8/R8BuildModel;Lorg/jetbrains/kotlin/gradle/declarative/projecttypes/jvmapplication/JvmApplicationProjectType;)V
+	public synthetic fun apply (Lorg/gradle/features/binding/ProjectFeatureApplicationContext;Lorg/gradle/features/binding/Definition;Lorg/gradle/features/binding/BuildModel;Ljava/lang/Object;)V
+}
+
