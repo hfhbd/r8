@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.gradleTasks)
+    api(projects.gradleTasks)
 }
 
 gradlePlugin.plugins.register("io.github.hfhbd.r8") {
