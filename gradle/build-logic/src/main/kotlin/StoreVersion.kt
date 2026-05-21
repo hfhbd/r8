@@ -24,7 +24,7 @@ abstract class StoreVersion : DefaultTask() {
                 separator = "\n",
                 postfix = "\n",
             ) { (name, gav) ->
-                "internal const val $name = \"$gav\""
+                "public const val $name = \"$gav\""
             }
         )
     }
