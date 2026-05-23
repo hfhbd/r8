@@ -1,9 +1,3 @@
-public abstract class io/github/hfhbd/r8/EcosystemPlugin : org/gradle/api/Plugin {
-	public fun <init> ()V
-	public synthetic fun apply (Ljava/lang/Object;)V
-	public fun apply (Lorg/gradle/api/initialization/Settings;)V
-}
-
 public abstract interface class io/github/hfhbd/r8/R8BuildModel : org/gradle/features/binding/BuildModel {
 	public abstract fun getAdditionalRules ()Lorg/gradle/api/provider/ListProperty;
 	public abstract fun getR8Version ()Lorg/gradle/api/provider/Property;
@@ -25,5 +19,18 @@ public abstract class io/github/hfhbd/r8/R8Feature$ApplyAction : org/gradle/feat
 	public fun <init> ()V
 	public fun apply (Lorg/gradle/features/binding/ProjectFeatureApplicationContext;Lio/github/hfhbd/r8/R8Definition;Lio/github/hfhbd/r8/R8BuildModel;Lorg/jetbrains/kotlin/gradle/declarative/projecttypes/jvmapplication/JvmApplicationProjectType;)V
 	public synthetic fun apply (Lorg/gradle/features/binding/ProjectFeatureApplicationContext;Lorg/gradle/features/binding/Definition;Lorg/gradle/features/binding/BuildModel;Ljava/lang/Object;)V
+}
+
+public abstract class io/github/hfhbd/r8/R8FeaturesPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/initialization/Settings;)V
+}
+
+public final class io/github/hfhbd/r8/VersionKt {
+	public static final field ANNOTATION_MODULE Ljava/lang/String;
+	public static final field ANNOTATION_VERSION Ljava/lang/String;
+	public static final field R8_MODULE Ljava/lang/String;
+	public static final field R8_VERSION Ljava/lang/String;
 }
 

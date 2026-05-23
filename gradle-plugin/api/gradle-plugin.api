@@ -4,3 +4,9 @@ public abstract class io/github/hfhbd/r8/R8Plugin : org/gradle/api/Plugin {
 	public fun apply (Lorg/gradle/api/Project;)V
 }
 
+public final class io/github/hfhbd/r8/VersionKt {
+	public static final field ANNOTATIONS Ljava/lang/String;
+	public static final field R8_MODULE Ljava/lang/String;
+	public static final field R8_VERSION Ljava/lang/String;
+}
+

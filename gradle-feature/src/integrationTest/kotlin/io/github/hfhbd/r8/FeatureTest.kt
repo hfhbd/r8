@@ -58,6 +58,8 @@ class FeatureTest {
            """.trimMargin()
         )
 
+        writeMainClass(projectDir)
+
         val r8Jar = assertBuild(projectDir)
         val jarFile = JarFile(r8Jar)
         assertEquals("com.example.Main", jarFile.manifest.mainAttributes[Attributes.Name.MAIN_CLASS])
@@ -105,6 +107,77 @@ class FeatureTest {
                |
            """.trimMargin()
         )
+
+        writeMainClass(projectDir)
+
+        val r8Jar = assertBuild(projectDir)
+        val jarFile = JarFile(r8Jar)
+        assertNull(jarFile.manifest.mainAttributes[Attributes.Name.MAIN_CLASS])
+    }
+
+    @Test
+    fun applicationPluginWithoutMainClassUsingAnnotations() {
+        val projectDir = createTempDirectory("integration-test").toFile()
+        File(projectDir, "settings.gradle.kts").writeText(
+            // language=kotlin
+            """
+               |pluginManagement {
+               |    repositories {
+               |        mavenCentral()
+               |        gradlePluginPortal()
+               |        maven {
+               |            url = uri("https://raw.githubusercontent.com/Kotlin/declarative-gradle-jetbrains-ecosystem-plugin/refs/heads/maven2")
+               |        }
+               |    }
+               |}
+               |
+               |
+               |plugins {
+               |    id("org.jetbrains.ecosystem")
+               |    id("io.github.hfhbd.r8.features")
+               |}
+               |
+               |dependencyResolutionManagement {
+               |    repositories {
+               |        mavenCentral()
+               |        google()
+               |    }
+               |}
+""".trimMargin()
+        )
+
+        File(projectDir, "build.gradle.kts").writeText(
+            // language=kotlin
+            """
+               |jvmApplication {
+               |  dependencies {
+               |    implementation(r8Libs.annotation)
+               |  }
+               |  r8 {
+               |      
+               |  }
+               |}
+               |
+           """.trimMargin()
+        )
+
+        File(projectDir, "src/main/java/com/example/Main.java").apply {
+            parentFile.mkdirs()
+
+            writeText(
+                // language=java
+                """package com.example;
+                    
+                   import androidx.annotation.Keep;
+
+public class Main {
+    @Keep
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+    }
+}"""
+            )
+        }
 
         val r8Jar = assertBuild(projectDir)
         val jarFile = JarFile(r8Jar)
@@ -155,12 +228,14 @@ class FeatureTest {
            """.trimMargin()
         )
 
+        writeMainClass(projectDir)
+
         val r8Jar = assertBuild(projectDir)
         val jarFile = JarFile(r8Jar)
         assertEquals("com.example.Main", jarFile.manifest.mainAttributes[Attributes.Name.MAIN_CLASS])
     }
 
-    private fun assertBuild(projectDir: File) : File {
+    fun writeMainClass(projectDir: File) {
         File(projectDir, "src/main/java/com/example/Main.java").apply {
             parentFile.mkdirs()
 
@@ -175,6 +250,9 @@ public class Main {
 }"""
             )
         }
+    }
+
+    private fun assertBuild(projectDir: File) : File {
 
         val isDebug = System.getenv("DEBUGGER_ENABLED") == "true"
 
@@ -183,7 +261,7 @@ public class Main {
             .withDebug(isDebug)
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments(":r8")
+            .withArguments(":r8", "-Porg.gradle.kotlin.dsl.dcl=true")
             .build()
 
         assertEquals(TaskOutcome.SUCCESS, build.task(":r8")?.outcome)
