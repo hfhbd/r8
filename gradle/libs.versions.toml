@@ -5,6 +5,8 @@ kotlin = "2.3.21"
 r8 = { module = "com.android.tools:r8", version = "9.1.31" }
 kotlin-ecosystem-plugin = { module = "org.jetbrains.ecosystem:ecosystem-plugin", version = "0.112.0" }
 
+annotations = { module = "androidx.annotation:annotation", version = "1.10.0" }
+
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

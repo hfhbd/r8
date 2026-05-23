@@ -33,8 +33,3 @@ public abstract interface class io/github/hfhbd/r8/R8WorkerParameters : org/grad
 	public abstract fun getTempDir ()Lorg/gradle/api/file/DirectoryProperty;
 }
 
-public final class io/github/hfhbd/r8/VersionKt {
-	public static final field R8_MODULE Ljava/lang/String;
-	public static final field R8_VERSION Ljava/lang/String;
-}
-

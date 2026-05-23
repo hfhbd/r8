@@ -46,9 +46,6 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
         internal abstract val configurations: ConfigurationRegistrar
 
         @get:Inject
-        internal abstract val components: ComponentMetadataHandler
-
-        @get:Inject
         internal abstract val tasks: TaskRegistrar
 
         @get:Inject
@@ -64,8 +61,6 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
 
             buildModel.r8Version.set(definition.r8Version.orElse(R8_VERSION))
             buildModel.additionalRules.set(definition.additionalRules)
-
-            components.withModule(R8_MODULE, R8VersionRule::class.java)
 
             val r8 = configurations.dependencyScope("r8") {
                 it.dependencies.addLater(buildModel.r8Version.map { r8Version ->

@@ -34,6 +34,8 @@ class IntegrationTest {
            """.trimMargin()
         )
 
+        writeMainClass(projectDir)
+
         val r8Jar = assertBuild(projectDir)
         val jarFile = JarFile(r8Jar)
         assertEquals("com.example.Main", jarFile.manifest.mainAttributes[Attributes.Name.MAIN_CLASS])
@@ -58,6 +60,54 @@ class IntegrationTest {
                |
            """.trimMargin()
         )
+
+        writeMainClass(projectDir)
+
+        val r8Jar = assertBuild(projectDir)
+        val jarFile = JarFile(r8Jar)
+        assertNull(jarFile.manifest.mainAttributes[Attributes.Name.MAIN_CLASS])
+    }
+
+    @Test
+    fun applicationPluginWithoutMainClassUsingAnnotation() {
+        val projectDir = createTempDirectory("integration-test").toFile()
+        File(projectDir, "build.gradle.kts").writeText(
+            // language=kotlin
+            """
+               |plugins {
+               |  id("io.github.hfhbd.r8")
+               |  id("application")
+               |}
+               |
+               |repositories {
+               |  mavenCentral()
+               |  google()
+               |}
+               |
+               |dependencies {
+               |  implementation(io.github.hfhbd.r8.ANNOTATIONS)
+               |}
+               |
+           """.trimMargin()
+        )
+
+        File(projectDir, "src/main/java/com/example/Main.java").apply {
+            parentFile.mkdirs()
+
+            writeText(
+                // language=java
+                """package com.example;
+
+                   import androidx.annotation.Keep;
+
+public class Main {
+    @Keep
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+    }
+}"""
+            )
+        }
 
         val r8Jar = assertBuild(projectDir)
         val jarFile = JarFile(r8Jar)
@@ -98,12 +148,14 @@ class IntegrationTest {
            """.trimMargin()
         )
 
+        writeMainClass(projectDir)
+
         val r8Jar = assertBuild(projectDir)
         val jarFile = JarFile(r8Jar)
         assertEquals("com.example.Main", jarFile.manifest.mainAttributes[Attributes.Name.MAIN_CLASS])
     }
 
-    private fun assertBuild(projectDir: File) : File {
+    fun writeMainClass(projectDir: File) {
         File(projectDir, "src/main/java/com/example/Main.java").apply {
             parentFile.mkdirs()
 
@@ -118,6 +170,9 @@ public class Main {
 }"""
             )
         }
+    }
+
+    private fun assertBuild(projectDir: File) : File {
 
         val isDebug = System.getenv("DEBUGGER_ENABLED") == "true"
 

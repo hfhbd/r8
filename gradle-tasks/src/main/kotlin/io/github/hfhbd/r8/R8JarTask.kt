@@ -164,6 +164,7 @@ private fun executeR8(
             .addLibraryFiles(javaHome)
             .addLibraryFiles(libJars)
             .addProgramFiles(programFiles)
+            .setEnableExperimentalKeepAnnotations(true)
             .build()
     )
 }
