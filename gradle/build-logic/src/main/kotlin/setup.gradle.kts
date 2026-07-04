@@ -10,7 +10,7 @@ plugins {
 kotlin {
     jvmToolchain(17)
     @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
-    abiValidation.enabled = true
+    abiValidation {}
 }
 
 tasks.validatePlugins {
