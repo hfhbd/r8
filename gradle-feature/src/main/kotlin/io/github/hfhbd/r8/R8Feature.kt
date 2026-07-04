@@ -71,7 +71,7 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
                 it.extendsFrom(r8)
             }
 
-            parentBuildModel.applications.configureEach { application ->
+            parentBuildModel.applications.all { application ->
                 val name = application.name.takeUnless { it == KotlinCompilation.MAIN_COMPILATION_NAME }
                 tasks.register("r8" + (name ?: "") , R8JarTask::class.java) {
                     it.mainClass.set(application.mainClassName)

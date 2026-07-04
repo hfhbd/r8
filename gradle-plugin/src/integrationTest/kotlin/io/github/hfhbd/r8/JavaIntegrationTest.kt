@@ -15,45 +15,21 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-class FeatureTest {
+class JavaIntegrationTest {
     @Test
     fun generatesSimplifiedJarWithApplicationPluginAndNoToolchain() {
         val projectDir = createTempDirectory("integration-test").toFile()
-        File(projectDir, "settings.gradle.kts").writeText(
+        File(projectDir, "build.gradle.kts").writeText(
             // language=kotlin
             """
-               |pluginManagement {
-               |    repositories {
-               |        mavenCentral()
-               |        gradlePluginPortal()
-               |        maven {
-               |            url = uri("https://raw.githubusercontent.com/Kotlin/declarative-gradle-jetbrains-ecosystem-plugin/refs/heads/maven2")
-               |        }
-               |    }
-               |}
-               |
-               |
                |plugins {
-               |    id("org.jetbrains.ecosystem")
-               |    id("io.github.hfhbd.r8.features")
+               |  id("io.github.hfhbd.r8")
+               |  id("application")
                |}
                |
-               |dependencyResolutionManagement {
-               |    repositories {
-               |        mavenCentral()
-               |        google()
-               |    }
-               |}
-""".trimMargin()
-        )
-
-        File(projectDir, "build.gradle.dcl").writeText(
-            // language=kotlin
-            """
-               |jvmApplication {
-               |  mainClass = "com.example.Main"
-               |  r8 {}
-               |}
+               |repositories.google()
+               |
+               |application.mainClass = "com.example.Main"
                |
            """.trimMargin()
         )
@@ -68,41 +44,18 @@ class FeatureTest {
     @Test
     fun applicationPluginWithoutMainClass() {
         val projectDir = createTempDirectory("integration-test").toFile()
-        File(projectDir, "settings.gradle.kts").writeText(
+        File(projectDir, "build.gradle.kts").writeText(
             // language=kotlin
             """
-               |pluginManagement {
-               |    repositories {
-               |        mavenCentral()
-               |        gradlePluginPortal()
-               |        maven {
-               |            url = uri("https://raw.githubusercontent.com/Kotlin/declarative-gradle-jetbrains-ecosystem-plugin/refs/heads/maven2")
-               |        }
-               |    }
-               |}
-               |
-               |
                |plugins {
-               |    id("org.jetbrains.ecosystem")
-               |    id("io.github.hfhbd.r8.features")
+               |  id("io.github.hfhbd.r8")
+               |  id("application")
                |}
                |
-               |dependencyResolutionManagement {
-               |    repositories {
-               |        mavenCentral()
-               |        google()
-               |    }
-               |}
-""".trimMargin()
-        )
-
-        File(projectDir, "build.gradle.dcl").writeText(
-            // language=kotlin
-            """
-               |jvmApplication {
-               |  r8 {
-               |      additionalRules += listOf("-keep public class com.example.Main { public static void main(java.lang.String[]); }")
-               |  }
+               |repositories.google()
+               |
+               |tasks.r8 {
+               | additionalRules.add("-keep public class com.example.Main { public static void main(java.lang.String[]); }")
                |}
                |
            """.trimMargin()
@@ -116,46 +69,23 @@ class FeatureTest {
     }
 
     @Test
-    fun applicationPluginWithoutMainClassUsingAnnotations() {
+    fun applicationPluginWithoutMainClassUsingAnnotation() {
         val projectDir = createTempDirectory("integration-test").toFile()
-        File(projectDir, "settings.gradle.kts").writeText(
-            // language=kotlin
-            """
-               |pluginManagement {
-               |    repositories {
-               |        mavenCentral()
-               |        gradlePluginPortal()
-               |        maven {
-               |            url = uri("https://raw.githubusercontent.com/Kotlin/declarative-gradle-jetbrains-ecosystem-plugin/refs/heads/maven2")
-               |        }
-               |    }
-               |}
-               |
-               |
-               |plugins {
-               |    id("org.jetbrains.ecosystem")
-               |    id("io.github.hfhbd.r8.features")
-               |}
-               |
-               |dependencyResolutionManagement {
-               |    repositories {
-               |        mavenCentral()
-               |        google()
-               |    }
-               |}
-""".trimMargin()
-        )
-
         File(projectDir, "build.gradle.kts").writeText(
             // language=kotlin
             """
-               |jvmApplication {
-               |  dependencies {
-               |    implementation(r8Libs.annotation)
-               |  }
-               |  r8 {
-               |      
-               |  }
+               |plugins {
+               |  id("io.github.hfhbd.r8")
+               |  id("application")
+               |}
+               |
+               |repositories {
+               |  mavenCentral()
+               |  google()
+               |}
+               |
+               |dependencies {
+               |  implementation(io.github.hfhbd.r8.ANNOTATIONS)
                |}
                |
            """.trimMargin()
@@ -167,7 +97,7 @@ class FeatureTest {
             writeText(
                 // language=java
                 """package com.example;
-                    
+
                    import androidx.annotation.Keep;
 
 public class Main {
@@ -190,40 +120,30 @@ public class Main {
         File(projectDir, "settings.gradle.kts").writeText(
             // language=kotlin
             """
-               |pluginManagement {
-               |    repositories {
-               |        mavenCentral()
-               |        gradlePluginPortal()
-               |        maven {
-               |            url = uri("https://raw.githubusercontent.com/Kotlin/declarative-gradle-jetbrains-ecosystem-plugin/refs/heads/maven2")
-               |        }
-               |    }
-               |}
-               |
-               |
                |plugins {
-               |    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-               |    id("org.jetbrains.ecosystem")
-               |    id("io.github.hfhbd.r8.features")
+               |  id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
                |}
                |
-               |dependencyResolutionManagement {
-               |    repositories {
-               |        mavenCentral()
-               |        google()
-               |    }
-               |}
-""".trimMargin()
+           """.trimMargin()
         )
 
-        File(projectDir, "build.gradle.dcl").writeText(
+        File(projectDir, "build.gradle.kts").writeText(
             // language=kotlin
             """
-               |jvmApplication {
-               |  mainClass = "com.example.Main"
-               |  toolchain.releaseVersion = 8
-               |  r8 {}
+               |plugins {
+               |  id("io.github.hfhbd.r8")
+               |  id("application")
                |}
+               |
+               |repositories.google()
+               |
+               |java {
+               |    toolchain {
+               |        languageVersion = JavaLanguageVersion.of(8)
+               |    }
+               |}
+               |
+               |application.mainClass = "com.example.Main"
                |
            """.trimMargin()
         )
@@ -261,7 +181,7 @@ public class Main {
             .withDebug(isDebug)
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments(":r8", "-Porg.gradle.kotlin.dsl.dcl=true")
+            .withArguments(":r8")
             .build()
 
         assertEquals(TaskOutcome.SUCCESS, build.task(":r8")?.outcome)

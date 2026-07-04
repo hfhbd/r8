@@ -71,6 +71,10 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
 
     @TaskAction
     internal fun createJar() {
+        val files = programFiles.asFileTree.matching {
+            it.exclude { file -> file.file.extension == "kotlin_module" }
+        }
+
         workerExecutor.classLoaderIsolation {
             it.classpath.from(r8Classpath)
         }.submit(R8Worker::class.java) {
@@ -80,7 +84,7 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
             it.r8Jar.set(r8Jar)
             it.additionalRules.set(additionalRules)
             it.libJars.from(libJars)
-            it.programFiles.from(programFiles.asFileTree)
+            it.programFiles.from(files)
         }
     }
 }
