@@ -30,7 +30,7 @@ interface R8BuildModel : BuildModel {
     val additionalRules: ListProperty<String>
 }
 
-abstract class DefaultR8BuildModel : R8BuildModel {
+internal abstract class DefaultR8BuildModel : R8BuildModel {
     abstract val r8DependencyCollector: DependencyCollector
 }
 
