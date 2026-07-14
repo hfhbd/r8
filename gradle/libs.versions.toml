@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.4.0"
+kotlin = "2.4.10"
 
 [libraries]
 r8 = { module = "com.android.tools:r8", version = "9.1.31" }
