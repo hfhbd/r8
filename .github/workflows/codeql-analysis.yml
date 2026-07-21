@@ -34,7 +34,7 @@ jobs:
         run: ./gradlew --no-build-cache classes
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@7188fc363630916deb702c7fdcf4e481b751f97a # v3
+        uses: github/codeql-action/analyze@e0647621c2984b5ed2f768cb892365bf2a616ad1 # v3
 
   analyzeActions:
     name: Analyze Actions
@@ -55,4 +55,4 @@ jobs:
           tools: linked
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@7188fc363630916deb702c7fdcf4e481b751f97a # v3
+        uses: github/codeql-action/analyze@e0647621c2984b5ed2f768cb892365bf2a616ad1 # v3
