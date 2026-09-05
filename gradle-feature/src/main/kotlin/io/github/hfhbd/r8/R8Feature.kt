@@ -6,6 +6,7 @@ import org.gradle.api.artifacts.dsl.DependencyCollector
 import org.gradle.api.artifacts.dsl.DependencyFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.features.annotations.BindsProjectFeature
 import org.gradle.features.binding.BuildModel
 import org.gradle.features.binding.Definition
@@ -89,7 +90,14 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
                         val appName = name?.let { "-$it"} ?: ""
                         it.file("r8/r8$appName.jar")
                     })
-                    it.programFiles.from(application.jvmCompilationUnit.outputs, application.runtimeClasspath)
+
+                    it.resourceDir.set(application.jvmCompilationUnit.resourcesOutput)
+                    val s = it.project.files(it.resourceDir)
+
+                    it.programFiles.from(
+                        application.jvmCompilationUnit.outputs.minus(s),
+                        application.runtimeClasspath.minus(s),
+                    )
 
                     it.r8Classpath.from(r8ClasspathConfig)
                 }
