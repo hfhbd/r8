@@ -82,9 +82,7 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
 
     @TaskAction
     internal fun createJar() {
-        val excludeResources = programFiles
-
-        val files = excludeResources.asFileTree.matching {
+        val files = programFiles.asFileTree.matching {
             it.exclude { file -> file.file.extension == "kotlin_module" }
         }
 
