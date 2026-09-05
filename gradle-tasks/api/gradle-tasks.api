@@ -7,7 +7,6 @@ public abstract class io/github/hfhbd/r8/R8JarTask : org/gradle/api/DefaultTask 
 	public abstract fun getR8Classpath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getR8Jar ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getResourceDir ()Lorg/gradle/api/file/DirectoryProperty;
-	protected final fun getResourceDirFileCollection ()Lorg/gradle/api/file/ConfigurableFileCollection;
 }
 
 public abstract class io/github/hfhbd/r8/R8VersionRule : org/gradle/api/artifacts/ComponentMetadataRule {

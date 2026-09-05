@@ -292,7 +292,7 @@ object T
             .withDebug(isDebug)
             .withPluginClasspath()
             .forwardOutput()
-            .withArguments(":r8", "-Porg.gradle.kotlin.dsl.dcl=true")
+            .withArguments(":r8", "-Porg.gradle.kotlin.dsl.dcl=true", "--stacktrace")
             .build()
 
         assertEquals(TaskOutcome.SUCCESS, build.task(":r8")?.outcome)

@@ -41,7 +41,6 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
     override fun bind(builder: ProjectFeatureBindingBuilder) {
         builder.bindProjectFeature("r8", ApplyAction::class)
             .withBuildModelImplementationType(DefaultR8BuildModel::class.java)
-            .withUnsafeApplyAction()
     }
 
     abstract class ApplyAction : ProjectFeatureApplyAction<R8Definition, R8BuildModel, JvmApplicationProjectType> {
@@ -56,9 +55,6 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
 
         @get:Inject
         internal abstract val layout: ProjectFeatureLayout
-
-        @get:Inject
-        internal abstract val sourceSetContainer: SourceSetContainer
 
         override fun apply(
             context: ProjectFeatureApplicationContext,
@@ -95,8 +91,13 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
                         it.file("r8/r8$appName.jar")
                     })
 
-                    it.programFiles.from(application.runtimeClasspath)
                     it.resourceDir.set(application.jvmCompilationUnit.resourcesOutput)
+                    val s = it.project.files(it.resourceDir)
+
+                    it.programFiles.from(
+                        application.jvmCompilationUnit.outputs.minus(s),
+                        application.runtimeClasspath.minus(s),
+                    )
 
                     it.r8Classpath.from(r8ClasspathConfig)
                 }
