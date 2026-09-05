@@ -172,9 +172,26 @@ import androidx.annotation.Keep
 
 @Keep
 fun main(vararg args: String) {
-    println("Hello World")
-}"""
+    println("Hello " + T::class.java.getResource("/foo").readText())
+}
+"""
             )
+        }
+
+        File(projectDir, "src/main/kotlin/com/example/T.kt").apply {
+            parentFile.mkdirs()
+
+            writeText(
+                // language=kotlin
+                """package com.example
+object T
+"""
+            )
+        }
+        File(projectDir, "src/main/resources/foo").apply {
+            parentFile.mkdirs()
+
+            writeText("World")
         }
 
         val r8Jar = assertBuild(projectDir)
@@ -242,9 +259,27 @@ fun main(vararg args: String) {
                 """package com.example
 
 fun main() {
-    println("Hello World")
-}"""
+    println("Hello " + T::class.java.getResource("/foo").readText())
+}
+
+"""
             )
+        }
+        File(projectDir, "src/main/kotlin/com/example/T.kt").apply {
+            parentFile.mkdirs()
+
+            writeText(
+                // language=kotlin
+                """package com.example
+object T
+
+"""
+            )
+        }
+        File(projectDir, "src/main/resources/foo").apply {
+            parentFile.mkdirs()
+
+            writeText("World")
         }
     }
 

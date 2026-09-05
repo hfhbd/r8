@@ -1,8 +1,12 @@
 package io.github.hfhbd.r8
 
 import com.android.tools.r8.CompilationMode
+import com.android.tools.r8.DataEntryResource
+import com.android.tools.r8.DataResourceProvider
 import com.android.tools.r8.JdkClassFileProvider
 import com.android.tools.r8.OutputMode
+import com.android.tools.r8.ProgramResource
+import com.android.tools.r8.ProgramResourceProvider
 import com.android.tools.r8.R8
 import com.android.tools.r8.R8Command
 import com.android.tools.r8.origin.Origin
@@ -34,6 +38,8 @@ import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
 import javax.inject.Inject
+import kotlin.io.path.relativeTo
+import kotlin.io.path.walk
 
 @CacheableTask
 abstract class R8JarTask internal constructor() : DefaultTask() {
@@ -47,10 +53,18 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
 
     @get:InputFiles
     @get:SkipWhenEmpty
-    @get:Classpath
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val programFiles: ConfigurableFileCollection
 
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val resourceDir: DirectoryProperty
+
     @get:Internal
+    protected val resourceDirFileCollection = project.files(resourceDir)
+
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val libJars: ConfigurableFileCollection
 
     @get:Input
@@ -71,7 +85,9 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
 
     @TaskAction
     internal fun createJar() {
-        val files = programFiles.asFileTree.matching {
+        val excludeResources = programFiles.minus(resourceDirFileCollection)
+
+        val files = excludeResources.asFileTree.matching {
             it.exclude { file -> file.file.extension == "kotlin_module" }
         }
 
@@ -85,6 +101,7 @@ abstract class R8JarTask internal constructor() : DefaultTask() {
             it.additionalRules.set(additionalRules)
             it.libJars.from(libJars)
             it.programFiles.from(files)
+            it.resourceDir.set(resourceDir)
         }
     }
 }
@@ -97,11 +114,15 @@ interface R8WorkerParameters : WorkParameters {
     val additionalRules: ListProperty<String>
     val libJars: ConfigurableFileCollection
     val programFiles: ConfigurableFileCollection
+    val resourceDir: DirectoryProperty
 }
 
 abstract class R8Worker : WorkAction<R8WorkerParameters> {
     override fun execute() {
-        if (parameters.mainClass.isPresent) {
+        val mainClass = parameters.mainClass.orNull
+        val programFiles = parameters.programFiles.map { it.toPath() }
+
+        if (mainClass != null) {
             val tempR8Jar = File(parameters.tempDir.get().asFile, "r8.jar")
             val mainClass = parameters.mainClass.get()
 
@@ -110,7 +131,8 @@ abstract class R8Worker : WorkAction<R8WorkerParameters> {
                 rules = parameters.additionalRules.get() + """-keep public class $mainClass { public static void main(java.lang.String[]); }""",
                 javaHome = parameters.javaHome.get().asFile.toPath(),
                 libJars = parameters.libJars.map { it.toPath() },
-                programFiles = parameters.programFiles.map { it.toPath() },
+                programFiles = programFiles,
+                resourceDir = parameters.resourceDir.get().asFile.toPath(),
             )
 
             modifyJarMainClass(tempR8Jar, parameters.r8Jar.get().asFile, mainClass)
@@ -120,14 +142,15 @@ abstract class R8Worker : WorkAction<R8WorkerParameters> {
                 rules = parameters.additionalRules.get(),
                 javaHome = parameters.javaHome.get().asFile.toPath(),
                 libJars = parameters.libJars.map { it.toPath() },
-                programFiles = parameters.programFiles.map { it.toPath() },
+                programFiles = programFiles,
+                resourceDir = parameters.resourceDir.get().asFile.toPath(),
             )
         }
     }
 }
 
 
-fun modifyJarMainClass(inputJarPath: File, outputJarPath: File, newMainClass: String) {
+private fun modifyJarMainClass(inputJarPath: File, outputJarPath: File, newMainClass: String) {
     val manifest = JarFile(inputJarPath).use { jarFile ->
         jarFile.manifest ?: Manifest().apply {
             mainAttributes[Attributes.Name.MANIFEST_VERSION] = "1.0"
@@ -156,8 +179,9 @@ private fun executeR8(
     outputJar: Path,
     rules: List<String>,
     javaHome: Path,
-    libJars: List<Path>,
-    programFiles: List<Path>,
+    libJars: Collection<Path>,
+    programFiles: Collection<Path>,
+    resourceDir: Path,
 ) {
     R8.run(
         R8Command.builder()
@@ -168,6 +192,15 @@ private fun executeR8(
             .addLibraryFiles(javaHome)
             .addLibraryFiles(libJars)
             .addProgramFiles(programFiles)
+            .addProgramResourceProvider(object : ProgramResourceProvider {
+                override fun getProgramResources(): List<ProgramResource> = emptyList()
+
+                override fun getDataResourceProvider() = DataResourceProvider { visitor ->
+                    for (file in resourceDir.walk()) {
+                        visitor.visit(DataEntryResource.fromFile(resourceDir, file.relativeTo(resourceDir)))
+                    }
+                }
+            })
             .build()
     )
 }

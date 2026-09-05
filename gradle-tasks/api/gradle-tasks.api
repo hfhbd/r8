@@ -6,10 +6,8 @@ public abstract class io/github/hfhbd/r8/R8JarTask : org/gradle/api/DefaultTask 
 	public abstract fun getProgramFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getR8Classpath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getR8Jar ()Lorg/gradle/api/file/RegularFileProperty;
-}
-
-public final class io/github/hfhbd/r8/R8JarTaskKt {
-	public static final fun modifyJarMainClass (Ljava/io/File;Ljava/io/File;Ljava/lang/String;)V
+	public abstract fun getResourceDir ()Lorg/gradle/api/file/DirectoryProperty;
+	protected final fun getResourceDirFileCollection ()Lorg/gradle/api/file/ConfigurableFileCollection;
 }
 
 public abstract class io/github/hfhbd/r8/R8VersionRule : org/gradle/api/artifacts/ComponentMetadataRule {
@@ -30,6 +28,7 @@ public abstract interface class io/github/hfhbd/r8/R8WorkerParameters : org/grad
 	public abstract fun getMainClass ()Lorg/gradle/api/provider/Property;
 	public abstract fun getProgramFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getR8Jar ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getResourceDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getTempDir ()Lorg/gradle/api/file/DirectoryProperty;
 }
 

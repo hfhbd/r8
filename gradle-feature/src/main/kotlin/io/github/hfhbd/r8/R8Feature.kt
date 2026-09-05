@@ -6,6 +6,7 @@ import org.gradle.api.artifacts.dsl.DependencyCollector
 import org.gradle.api.artifacts.dsl.DependencyFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.features.annotations.BindsProjectFeature
 import org.gradle.features.binding.BuildModel
 import org.gradle.features.binding.Definition
@@ -40,6 +41,7 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
     override fun bind(builder: ProjectFeatureBindingBuilder) {
         builder.bindProjectFeature("r8", ApplyAction::class)
             .withBuildModelImplementationType(DefaultR8BuildModel::class.java)
+            .withUnsafeApplyAction()
     }
 
     abstract class ApplyAction : ProjectFeatureApplyAction<R8Definition, R8BuildModel, JvmApplicationProjectType> {
@@ -54,6 +56,9 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
 
         @get:Inject
         internal abstract val layout: ProjectFeatureLayout
+
+        @get:Inject
+        internal abstract val sourceSetContainer: SourceSetContainer
 
         override fun apply(
             context: ProjectFeatureApplicationContext,
@@ -89,7 +94,9 @@ abstract class R8Feature : Plugin<Project>, ProjectFeatureBinding {
                         val appName = name?.let { "-$it"} ?: ""
                         it.file("r8/r8$appName.jar")
                     })
-                    it.programFiles.from(application.jvmCompilationUnit.outputs, application.runtimeClasspath)
+
+                    it.programFiles.from(application.runtimeClasspath)
+                    it.resourceDir.set(application.jvmCompilationUnit.resourcesOutput)
 
                     it.r8Classpath.from(r8ClasspathConfig)
                 }
